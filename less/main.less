@@ -1,0 +1,89 @@
+@import "vars";
+@import "mixins";
+@import "components/base";
+@import "components/block";
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700');
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 1em;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    padding: 0.5em 0;
+}
+
+.main {
+    background-color: @blueLight;
+    display: flex;
+    flex-direction: column;
+    min-height: 90vh;
+}
+
+.data{
+
+    &__Form{
+        padding-top: 1em;
+        position: relative;
+    }
+
+    &__input {
+        padding: 1em;
+        margin-right: 1em;
+        .border;        
+    }
+    &__input::placeholder {
+        color: @greyLight;
+    }
+    &__button {
+        margin: 1em 0;
+        padding: 1em 2em;
+        margin-right: 1em;
+        text-transform: capitalize;
+        color: @white;
+        font-weight: 700;
+        background-color: @violet;
+        outline: 0;
+        .border;
+    }
+    &__button:hover{
+        background: #574494;
+    }
+}
+
+.data__table{
+    padding: 1em;
+    background: @white;
+    .border;
+}
+
+.data__table-header {
+    .border;
+    margin-top: 1em;
+    background: @greyLight;
+    font-weight: 700;
+
+}
+
+.data__table-body{
+  .row {
+    .border-bottom;
+  } 
+}
+
+.msgBox {
+    top: -0.5em;
+    left: 0;
+    position: absolute;
+    padding: 0 1em;
+    color: @red;
+}
