@@ -1,39 +1,54 @@
 window.onload = function () {
     form.addEventListener('submit', verify);
-    // registration.addEventListener('click', () => {window.location.replace("http://localhost:4000/clientList.html")});
 };
 const login = document.getElementById('login');
 const password = document.getElementById('password');
 const mail = document.getElementById('mail');
 const form =  document.getElementById('form');
-const registration = document.getElementById('registration');
+const confirmPass = document.getElementById('confirmPass');
+const msg = document.getElementById('msg');
 
-function InputForm (login, pass, mail) {
-    this.password = pass;
-    this.login = login;
-    this.mail = mail;
+class InputForm {
+    constructor (login, pass, mail) {
+        this.password = pass;
+        this.login = login;
+        this.mail = mail;
+    }
+}
+
+function standartInputPassStyle() {
+    password.style.border = 'none';
+    confirmPass.style.border = 'none';
+    msg.innerHTML = '*requaired fields';
 }
 
 function verify(event) {
     event.preventDefault();
-    const obj = new InputForm(login.value, password.value, mail.value);
-    const request = new XMLHttpRequest();
-    request.open("POST", "http://localhost:4000/register", true);
-    request.setRequestHeader("Content-Type", "application/json");
-    const data = JSON.stringify(obj);
-    request.send(data);
-    // Это простой способ подготавливить данные для отправки (все браузеры и IE > 9)
-    // Функция для наблюдения изменения состояния request.readyState обновления statusMessage соответственно
-    request.onreadystatechange = function () {
-        if (request.readyState === 4) {
-            if (request.status == 200 && request.status < 300) {
-                if (request.responseText === 'users allready add') {
-                    alert("bad");
+    if(password.value !== confirmPass.value) {
+        password.style.border = '5px solid red';
+        confirmPass.style.border = '5px solid red';
+        msg.innerHTML = 'check confirm password';
+        return;
+    } else {
+        standartInputPassStyle();
+        fetch('http://localhost:4000/register', {
+            method: 'post',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(new InputForm(login.value, password.value, mail.value))
+        })
+            .then(res => res.text())
+            .then(function (text) {
+                if (text === 'users allready add') {
+                    msg.innerHTML = 'users already added!!!';
                 } else {
+                    msg.innerHTML = '*requaired fields';
                     window.location.replace("http://localhost:4000/index.html");
                 }
-            }
-        }
+            })
+            .catch(alert);
     }
 }
 

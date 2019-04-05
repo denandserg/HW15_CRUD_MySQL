@@ -27,6 +27,7 @@ select,
 button {
     font: inherit;
 }
+
 .header{
     width: 80%;
     margin: 0 auto;
@@ -36,12 +37,12 @@ button {
     justify-content: space-between;
     align-items: center;
 }
+.header > .data__button{
+    height: 60px;
+}
 .main{
     display: flex;
     flex-direction: row;
-}
-.msgBox{
-    float: left;
 }
 .create{
     display: flex;
@@ -71,10 +72,12 @@ button {
     outline: 0;
     border: 1px solid #F2F2F2;
     border-radius: 4px;
-    width: 80px;
+    width: 100px;
+    height: 40px;
 }
 .data__button:hover {
     background: greenyellow;
+    cursor: pointer;
 }
 .columnButton{
     display: flex;
@@ -86,6 +89,13 @@ button {
     justify-content: flex-start;
     margin: 0;
     padding: 0;
+}
+.data__table-body > .row:hover{
+    background-color: greenyellow;
+}
+.msgBox{
+    display: flex;
+    justify-content: center;
 }
 .container {
     width: 80%;
@@ -120,4 +130,27 @@ button {
     position: relative;
     float: left;
     padding: 0.5em;
+}
+
+h1 {
+    font-size: 40px;
+    font-weight: normal;
+    cursor: pointer;
+    text-shadow: 0 0 0 greenyellow;
+    color: transparent;
+    animation: shadows 4s 1s 5 ease-in;
+}
+
+
+
+@keyframes shadows {
+    60% {
+        text-shadow: 0 0 0 greenyellow;
+    }
+    90% {
+        text-shadow: 0 30px 40px transparent;
+    }
+    100% {
+        text-shadow: 0 0 0 transparent;
+    }
 }

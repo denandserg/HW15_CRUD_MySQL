@@ -6,6 +6,7 @@ const cors = require('cors');
 let checkUserFlag = false;
 let arrAuthUserLogPas = [];
 let currentResponse;
+let currentID;
 app.use(bodyParser.json());
 app.use(cors());
 app.options('*', cors());
@@ -16,6 +17,10 @@ app.get('/currentUser', (req, res) => {
 
 app.get('/currentData', (req, res) => {
     getUserDataBase(res);
+});
+
+app.get('/clearCurName', (req, res) => {
+    arrAuthUserLogPas = [];
 });
 
 app.post('/deleteRow', (req, res) => {
@@ -30,8 +35,8 @@ app.post('/updateRow', (req, res) => {
 
 app.post('/login', function (req, res) {
     createTableLogin();
-    createTablePerson();
     checkUserInDataBase(req);
+    getIdUser(req);
     setTimeout(responseSend, 500);
     function responseSend() {
         if (checkUserFlag) {
@@ -45,27 +50,28 @@ app.post('/login', function (req, res) {
   });
 
 app.post('/register', function (req, res) {
+    checkUserInDataBase(req);
     if(checkUserFlag===false) {
+        createTablePerson();
         saveDataPersonInLoginTable(req);
-        saveDataPersonInPersonTableRegistration(req);
         setTimeout(responseSend, 500);
     } else {
         res.send('users allready add');
     }
     function responseSend() {
-            const ob = req.body.mail;
             arrAuthUserLogPas = [];
+            getIdUser(req);
             arrAuthUserLogPas.push(req.body.login);
             arrAuthUserLogPas.push(req.body.password);
-            res.send(ob);
-            console.log('register successfully')
+            res.send('OK');
     }
 });
 
 app.post('/createData', function (req, res) {
-        saveDataPersonInLoginTable(req);
-        saveDataPersonInPersonTable(req);
-        res.end();
+        if(currentID) {
+            saveDataPersonInPersonTable(req);
+            res.send('OK');
+        }
 });
 
 app.use(express.static('public'));
@@ -102,28 +108,10 @@ function  saveDataPersonInPersonTable(req) {
     connectionDB.connect(function (err) {
         if (err) throw err;
         console.log("Connected!");
-        const sql = `INSERT INTO tbperson (firstName, lastName, age, mailID) VALUES ("${req.body.firstName}", "${req.body.lastName}", "${req.body.age}", "${req.body.mail}")`;
+        const sql = `INSERT INTO tbperson (personID, firstName, lastName, age, loginID) VALUES ("${req.body.id}", "${req.body.firstName}", "${req.body.lastName}", "${req.body.age}", "${currentID[0].id}")`;
         connectionDB.query(sql, function (err, result) {
             if (err) throw err;
             console.log("Saved data person");
-        });
-    });
-}
-
-function  saveDataPersonInPersonTableRegistration(req) {
-    const connectionDB = mysql.createConnection({
-        host: "localhost",
-        user: "root",
-        database: "person"
-    });
-
-    connectionDB.connect(function (err) {
-        if (err) throw err;
-        console.log("Connected!");
-        const sql = `INSERT INTO tbperson (mailID) VALUES ("${req.body.mail}")`;
-        connectionDB.query(sql, function (err, result) {
-            if (err) throw err;
-            console.log("Saved data personReg");
         });
     });
 }
@@ -139,10 +127,10 @@ function createTableLogin() {
         if (err) throw err;
         console.log("Connected!");
         const sql = "CREATE TABLE IF NOT EXISTS tblogin (\n" +
+            "        id INT AUTO_INCREMENT PRIMARY KEY,\n" +
             "        login varchar(100) NOT NULL,\n" +
             "        password varchar(100) NOT NULL,\n" +
-            "        mail varchar(100) NOT NULL,\n" +
-            "        PRIMARY KEY (`mail`)\n" +
+            "        mail varchar(100) NOT NULL\n" +
             ")";
         connectionDB.query(sql, function (err, result) {
             if (err) throw err;
@@ -162,14 +150,14 @@ function createTablePerson() {
         if (err) throw err;
         console.log("Connected!");
         const sql = "CREATE TABLE IF NOT EXISTS tbPerson (\n" +
-            "        personID int NOT NULL auto_increment,\n" +
+            "        count INT AUTO_INCREMENT PRIMARY KEY NOT NULL,\n" +
+            "        personID int NOT NULL,\n" +
             "        firstName varchar(100),\n" +
             "        lastName varchar(100),\n" +
             "        age varchar(100),\n" +
-            "        mailID varchar(100) NOT NULL,\n" +
-            "        PRIMARY KEY (personID),\n" +
-            "        FOREIGN KEY (mailID)\n" +
-            "        REFERENCES tblogin(mail)\n" +
+            "        loginID INT NOT NULL,\n" +
+            "        FOREIGN KEY (loginID)\n" +
+            "        REFERENCES tblogin(id)\n" +
             "        ON DELETE CASCADE " +
             ")";
         connectionDB.query(sql, function (err, result) {
@@ -197,14 +185,13 @@ function checkUserInDataBase (req) {
             for(let i in result) {
                 console.log(result[i].password);
                 console.log(result[i].login);
-                if(result[i].login === request.body.login && result[i].password === request.body.password) {
+                if(result[i].login === request.body.login) {
                     checkUserFlag = true;
                     break;
                 } else {
                     checkUserFlag = false;
                 }
             }
-
         });
     });
 }
@@ -218,45 +205,15 @@ function getUserDataBase (res) {
     connectionDBUpdate.connect(function (err) {
         if (err) throw err;
         console.log("Connected!");
-        connectionDBUpdate.query("SELECT tbperson.personID, tblogin.login, tblogin.password, tblogin.mail, tbperson.firstName, tbperson.lastName, tbperson.age FROM tbperson, tblogin WHERE tbperson.mailID = tblogin.mail", function (err, result, fields) {
+        connectionDBUpdate.query(`SELECT tbperson.personID, tbperson.firstName, tbperson.lastName, tbperson.age FROM tbperson WHERE tbperson.loginID = ${currentID[0].id}`, function (err, result, fields) {
             if (err) throw err;
             console.log(result);
             res.send(JSON.stringify(result));
         });
     });
-
-
 }
 
 function updateRowPerson(req) {
-    const connectionDB = mysql.createConnection({
-        host: "localhost",
-        user: "root",
-        database: "person"
-    });
-    connectionDB.connect(function (err) {
-        if (err) throw err;
-        console.log("Connected!");
-        connectionDB.query(`UPDATE tblogin SET login = "${req.body.login}" WHERE mail = "${req.body.mail}"`, function (err, result, fields) {
-            if (err) throw err;
-            console.log(result);
-        });
-    });
-
-    const connectionDB2 = mysql.createConnection({
-        host: "localhost",
-        user: "root",
-        database: "person"
-    });
-    connectionDB2.connect(function (err) {
-        if (err) throw err;
-        console.log("Connected!");
-        connectionDB2.query(`UPDATE tblogin SET password = "${req.body.password}" WHERE mail = "${req.body.mail}"`, function (err, result, fields) {
-            if (err) throw err;
-            console.log(result);
-        });
-    });
-
     const connectionDB3 = mysql.createConnection({
         host: "localhost",
         user: "root",
@@ -265,7 +222,7 @@ function updateRowPerson(req) {
     connectionDB3.connect(function (err) {
         if (err) throw err;
         console.log("Connected!");
-        connectionDB3.query(`UPDATE tbperson SET firstname = "${req.body.firstName}" WHERE mailID = "${req.body.mail}"`, function (err, result, fields) {
+        connectionDB3.query(`UPDATE tbperson SET firstName = "${req.body.firstName}" WHERE personID = "${req.body.id}" AND loginID = "${currentID[0].id}"`, function (err, result, fields) {
             if (err) throw err;
             console.log(result);
         });
@@ -279,7 +236,7 @@ function updateRowPerson(req) {
     connectionDB4.connect(function (err) {
         if (err) throw err;
         console.log("Connected!");
-        connectionDB4.query(`UPDATE tbperson SET lastname = "${req.body.lastName}" WHERE mailID = "${req.body.mail}"`, function (err, result, fields) {
+        connectionDB4.query(`UPDATE tbperson SET lastName = "${req.body.lastName}" WHERE personID = "${req.body.id}" AND loginID = "${currentID[0].id}"`, function (err, result, fields) {
             if (err) throw err;
             console.log(result);
         });
@@ -293,7 +250,7 @@ function updateRowPerson(req) {
     connectionDB5.connect(function (err) {
         if (err) throw err;
         console.log("Connected!");
-        connectionDB5.query(`UPDATE tbperson SET age = "${req.body.age}" WHERE mailID = "${req.body.mail}"`, function (err, result, fields) {
+        connectionDB5.query(`UPDATE tbperson SET age = "${req.body.age}" WHERE personID = "${req.body.id}" AND loginID = "${currentID[0].id}"`, function (err, result, fields) {
             if (err) throw err;
             console.log(result);
         });
@@ -309,9 +266,26 @@ function deleteRowPerson(req) {
     connectionDB.connect(function (err) {
         if (err) throw err;
         console.log("Connected!");
-        connectionDB.query(`DELETE FROM tblogin WHERE mail = "${req.body.mail}"`, function (err, result, fields) {
+        connectionDB.query(`DELETE FROM tbperson WHERE personID = "${req.body.id}" AND loginID = "${currentID[0].id}"`, function (err, result, fields) {
             if (err) throw err;
             currentResponse = result;
+            console.log(result);
+        });
+    });
+}
+
+function getIdUser(req) {
+    const connectionIDDB = mysql.createConnection({
+        host: "localhost",
+        user: "root",
+        database: "person"
+    });
+    connectionIDDB.connect(function (err) {
+        if (err) throw err;
+        console.log("Connected!");
+        connectionIDDB.query(`SELECT id FROM tblogin WHERE login = "${req.body.login}"`, function (err, result, fields) {
+            if (err) throw err;
+            currentID = result;
             console.log(result);
         });
     });

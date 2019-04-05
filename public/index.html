@@ -11,45 +11,41 @@
 
 <body>
 
-    <div class="header">
-        <h1>CRUD node.js</h1>
-        <h2 id="userName">user name</h2>
-        <button id="logout" class="data__button">Logout</button>
-    </div>
+<div class="header">
+    <h1>CRUD node.js</h1>
+    <h2 id="userName">user name</h2>
+    <button id="logout" class="data__button">Logout</button>
+</div>
 
 <div class="main">
     <div class="create">
-        <input type="text" id="login" class="data__input" placeholder="Login">
-        <input type="text" id="pass" class="data__input" placeholder="Password">
-        <input type="email" id="mail" class="data__input" placeholder="Mail">
+        <input type="number" id="id" class="data__input" min="1" placeholder="Person ID">
         <input type="text" id="fname" class="data__input" placeholder="First name">
         <input type="text" id="lname" class="data__input" placeholder="Last name">
         <input type="number" id="age" class="data__input" placeholder="Age">
     </div>
 
-            <div id="data__Table" class="data__table">
-                <h2>Data Table</h2>
-                <div id="msgBox" class="msgBox"></div>
-                <div class="data__table-header">
-                    <div class="row">
-                        <div class="col-2">ID</div>
-                        <div class="col-4">login</div>
-                        <div class="col-4">pass</div>
-                        <div class="col-4">mail</div>
-                        <div class="col-4">First name</div>
-                        <div class="col-4">Last name</div>
-                        <div class="col-2">Age</div>
-                    </div>
-                </div>
-                <div class="data__table-body" id="tableBody">
-
-                </div>
+    <div id="data__Table" class="data__table">
+        <h2>Data Table</h2>
+        <div id="msgBox" class="msgBox"></div>
+        <div class="data__table-header">
+            <div class="row">
+                <div class="col-2">Person ID</div>
+                <div class="col-4">First name</div>
+                <div class="col-4">Last name</div>
+                <div class="col-2">Age</div>
             </div>
+        </div>
+        <div class="data__table-body" id="tableBody">
+
+        </div>
+    </div>
 
     <div class="columnButton">
         <button id="createBtn" class="data__button">CREATE</button>
         <button id="updateBtn" class="data__button">UPDATE</button>
         <button id="deleteBtn" class="data__button">DELETE</button>
+        <div></div>
         <button id="saveBtn" class="data__button">Save</button>
         <button id="clearBtn" class="data__button">Clear</button>
     </div>
